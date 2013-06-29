@@ -22,7 +22,7 @@ $('#textarea').keypress(function() {
 
 	setTimeout(updateWindows,1);
 }).focus(function(){
-                          $(this).text('');
+                          $(this).text(' ');
                           $(this).off('focus');
 });
 	
@@ -131,6 +131,7 @@ function preg_quote( str ) {
 function highlight( data, search )
 {
         var newData = data.replace( new RegExp( "(" + preg_quote( search ) + ")" , 'gi' ), "<b style='background-color:yellow;'>$1</b>" );
+        var newData = data.replace( new RegExp( "(" + preg_quote( search ) + ")" , 'gi' ), "<b style='background-color:yellow;'>$1</b>" );
     return newData;
 }
 
@@ -138,47 +139,25 @@ function highlight( data, search )
 function getCaretPosition(editableDiv) {
     var caretPos = 0, containerEl = null, sel, range;
     tw = document.createTreeWalker(editableDiv, NodeFilter.SHOW_TEXT, null, null);
-    var n, o = 0, index = 0;
-    sel = window.getSelection();
+    var n, o = 0;
+    var index = 0;
+    var sel = window.getSelection();
     if (sel.rangeCount) {
-    range = sel.getRangeAt(0);
-
-    while (n = tw.nextNode()) {
-        console.log(n);
-
-
-        if (n === range.endContainer) {
-            index += range.endOffset;
-            break;
-        }
-        else{
-            index += n.textContent.length;
-        }
-    }
-    return index;
-    /*
-    if (window.getSelection) {
-        sel = window.getSelection();
-        if (sel.rangeCount) {
-            range = sel.getRangeAt(0);
-
-            if (range.commonAncestorContainer.parentNode == editableDiv) {
-                caretPos = range.endOffset;
-                console.log("cp "+caretPos);
+        range = sel.getRangeAt(0);
+        e = range.endContainer;
+        if (e != editableDiv){
+            while (n = tw.nextNode()) {
+                if (n === range.endContainer) {
+                    index += range.endOffset;
+                    break;
+                }
+                else{
+                    index += n.textContent.length;
+                }
             }
-        }
-    } else if (document.selection && document.selection.createRange) {
-        range = document.selection.createRange();
-        if (range.parentElement() == editableDiv) {
-            var tempEl = document.createElement("span");
-            editableDiv.insertBefore(tempEl, editableDiv.firstChild);
-            var tempRange = range.duplicate();
-            tempRange.moveToElementText(tempEl);
-            tempRange.setEndPoint("EndToEnd", range);
-            caretPos = tempRange.text.length;
+            return index;
         }
     }
-    return caretPos;*/
 }
 
 var setSelectionRange = function(element, start, end) {
@@ -186,20 +165,36 @@ var setSelectionRange = function(element, start, end) {
     sel = getSelection(),
     n, o = 0;
     tw = document.createTreeWalker(element, NodeFilter.SHOW_TEXT, null, null);
-    console.log(tw);
+    var started = false;
+    var i = 0;
     while (n = tw.nextNode()) {
-        console.log(n);
+        
         o += n.textContent.length;
-        if (o > start) {
-            rng.setStart(n, n.textContent.length + start - o);
-            start = Infinity;
+        if (!started) {
+            rng.setStart(n, 0);
+            started = true;
         }
         if (o >= end) {
-            rng.setEnd(n, n.textContent.length + end - o);
+            /*
+            if (editable.childNodes[i].tagName == "B"){
+                var text = document.createElement("span");
+                var text2 = document.createTextNode(" ");
+                text.appendChild(text2);
+          
+                n.parentNode.insertBefore(text, n.nextSibling);
+                rng.setEnd(text, 0);
+            }
+            else{*/
+                rng.setEnd(n, n.textContent.length + end - o);
+            //}
+
             break;
         }
+        i += 1;
+
     }
     sel.removeAllRanges();
+    rng.collapse(false);
     sel.addRange(rng);
 };
 
@@ -209,53 +204,22 @@ var setCaret = function(element, index) {
 
 var firstChar = false;
 $("#textarea").keypress(function(event){
+    var editable = document.getElementById('textarea');
     var key = String.fromCharCode(event.which);
     var existingText = $(this).text();
     var newText = highlight( existingText, key);
     var editable = document.getElementById('textarea');
     var index = getCaretPosition(editable);    
-    var savedRange;
-    /*
-    if(window.getSelection && window.getSelection().rangeCount > 0)
-    {
-        console.log("saving");
-        savedRange = window.getSelection().getRangeAt(0).cloneRange();
-        savedRange.collapse(false);
-    }
-    */
-    $(this).html(newText);
-    setCaret('textarea', index);
-    /*
-    var sel = window.getSelection();
-    sel.removeAllRanges();
-    console.log(savedRange);
-    sel.addRange(savedRange);
-    var el = document.getElementById("textarea");
-    var range = document.createRange();
-    var sel = window.getSelection();
-//    index = Math.min(index, $(el).text().length);
-    try{
-        range.setStart(el.childNodes[0], 1);
-        range.setEnd(el.childNodes[0], index-1);
-        //range.collapse(false);
-        //sel.removeAllRanges();
-        //sel.addRange(range);    
+    if (newText != existingText && key != " "){
+        $(this).html(newText);
+        var editable = document.getElementById('textarea');
+        if (index && editable.childNodes.length > 1){
+            console.log(index);
+            setSelectionRange(editable, 0, index);
+
+        }
+
 
     }
-    catch (NotFoundError){
-        console.log(el.childNodes[0]);
-        console.log(el);
-        console.log("why" + index);
-    }
-    
-    
-    /*editable = document.getElementById('textarea');
-    if ($('#textarea').text().trim().length > 0 ){
-        setCaret(editable,index);
-    }
-    else{
-        firstChar = true;
-    }
-    */
-   //           placeCaretAtEnd( document.getElementById("textarea") );
+
 });
