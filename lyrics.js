@@ -18,13 +18,6 @@ function fancyPoemify(str)
 	return str
 }
 
-$('#textarea').keypress(function() {
-
-	setTimeout(updateWindows,1);
-}).focus(function(){
-                          $(this).text(' ');
-                          $(this).off('focus');
-});
 	
 function updateWindows(){
 	text = $('#textarea').text();
@@ -215,6 +208,8 @@ function htmlForTextWithEmbeddedNewlines(text) {
 }
 
 $("#textarea").keypress(function(event){
+	setTimeout(updateWindows,1);
+    setTimeout(updateDefsWindows,1);
     var editable = document.getElementById('textarea');
     var key = String.fromCharCode(event.which);
     var existingText = $(this).text();
@@ -228,4 +223,7 @@ $("#textarea").keypress(function(event){
             setSelectionRange(editable, 0, index);
         }
     }
+}).focus(function(){
+    $(this).text(' ');
+    $(this).off('focus');
 });
