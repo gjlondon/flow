@@ -29,7 +29,7 @@ $('#textarea').keypress(function() {
 function updateWindows(){
 	text = $('#textarea').text();
 
-	$('#fancypoem').html(fancyPoemify(text));
+//	$('#fancypoem').html(fancyPoemify(text));
 	hyp = document.getElementById("bigfancypoem");	
 	atTheBottom = ((hyp.scrollTop+hyp.clientHeight) >= hyp.scrollHeight-30);
 	//alert(hyp.scrollTop + " " + hyp.clientHeight + " " + (hyp.scrollTop+hyp.clientHeight) + " " + hyp.scrollHeight); 
@@ -128,10 +128,10 @@ function preg_quote( str ) {
     return (str+'').replace(/([\\\.\+\*\?\[\^\]\$\(\)\{\}\=\!\<\>\|\:])/g, "\\$1");
 }
 
+
 function highlight( data, search )
 {
-        var newData = data.replace( new RegExp( "(" + preg_quote( search ) + ")" , 'gi' ), "<b style='background-color:yellow;'>$1</b>" );
-        var newData = data.replace( new RegExp( "(" + preg_quote( search ) + ")" , 'gi' ), "<b style='background-color:yellow;'>$1</b>" );
+    var newData = data.replace( new RegExp( "(" + preg_quote( search ) + ")" , 'gi' ), "<b style='background-color:yellow;'>$1</b>" );
     return newData;
 }
 
@@ -191,18 +191,29 @@ var setSelectionRange = function(element, start, end) {
             break;
         }
         i += 1;
-
     }
     sel.removeAllRanges();
     rng.collapse(false);
     sel.addRange(rng);
 };
 
-var setCaret = function(element, index) {
-    setSelectionRange(element, index, index);
-};
+function htmlForTextWithEmbeddedNewlines(text) {
+    var htmls = [];
+    var lines = text.split(/\n/);
+    // The temporary <div/> is to perform HTML entity encoding reliably.
+    //
+    // document.createElement() is *much* faster than jQuery('<div/>')
+    // http://stackoverflow.com/questions/268490/
+    //
+    // You don't need jQuery but then you need to struggle with browser
+    // differences in innerText/textContent yourself
+    var tmpDiv = jQuery(document.createElement('div'));
+    for (var i = 0 ; i < lines.length ; i++) {
+        htmls.push(tmpDiv.text(lines[i]).html());
+    }
+    return htmls.join("<br>");
+}
 
-var firstChar = false;
 $("#textarea").keypress(function(event){
     var editable = document.getElementById('textarea');
     var key = String.fromCharCode(event.which);
@@ -214,12 +225,7 @@ $("#textarea").keypress(function(event){
         $(this).html(newText);
         var editable = document.getElementById('textarea');
         if (index && editable.childNodes.length > 1){
-            console.log(index);
             setSelectionRange(editable, 0, index);
-
         }
-
-
     }
-
 });
