@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html>
+<article>
+  <section>
+    <p>Any elements with the <code>contenteditable</code> attribute set will have a grey outline as you hover over. Feel free to edit and change their contents.  I'm using local storage to maintain your changes.</p>
+  </section>
+  <section id="editable" contenteditable="true">
+    <h2 id="hedd">Go ahead, edit away!</h2>
+    <p>Here's a typical paragraph element</p>
+    <ol>
+      <li>and now a list</li>
+      <li>with only</li>
+      <li>three items</li>
+    </ol>
+  </section>
+  <div>
+    <input type="button" id="clear" value="Clear changes" />
+  </div>
+</article>
+<script src="http://code.jquery.com/jquery-1.10.1.min.js"></script>
+<script>
+
+function preg_quote( str ) {
+    // http://kevin.vanzonneveld.net
+    // +   original by: booeyOH
+    // +   improved by: Ates Goral (http://magnetiq.com)
+    // +   improved by: Kevin van Zonneveld (http://kevin.vanzonneveld.net)
+    // +   bugfixed by: Onno Marsman
+    // *     example 1: preg_quote("$40");
+    // *     returns 1: '\$40'
+    // *     example 2: preg_quote("*RRRING* Hello?");
+    // *     returns 2: '\*RRRING\* Hello\?'
+    // *     example 3: preg_quote("\\.+*?[^]$(){}=!<>|:");
+    // *     returns 3: '\\\.\+\*\?\[\^\]\$\(\)\{\}\=\!\<\>\|\:'
+
+    return (str+'').replace(/([\\\.\+\*\?\[\^\]\$\(\)\{\}\=\!\<\>\|\:])/g, "\\$1");
+}
+
+function highlight( data, search )
+{
+        var newData = data.replace( new RegExp( "(" + preg_quote( search ) + ")" , 'gi' ), "<b style='background-color:yellow;'>$1</b>" );
+        console.log(newData)
+    return newData;
+}
+
+var editable = document.getElementById('editable');
+$("#editable").keyup(function(event){
+var key = String.fromCharCode(event.which);
+console.log(key);
+var existingText = $(this).children("p").text();
+console.log(existingText);
+newText = highlight( existingText, key);
+$(this).children("p").html(newText);
+});
+$(".highlight").css("color", "red");
+</script>
+</html>
